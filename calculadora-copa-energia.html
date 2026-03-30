@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#CC0000" />
+  <title>Calculadora de Payback | Copa Energia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red:       #CC0000;
+  --red-d:     #990000;
+  --red-l:     #FDECEA;
+  --gold:      #D4940A;
+  --charcoal:  #1A1A1A;
+  --gray-d:    #2D2D2D;
+  --gray-m:    #5A5A5A;
+  --gray-l:    #F5F5F5;
+  --gray-b:    #E0E0E0;
+  --green:     #1D9E75;
+  --green-l:   #E1F5EE;
+  --green-d:   #0F6E56;
+  --white:     #FFFFFF;
+  --text:      #1A1A1A;
+  --text-m:    #5A5A5A;
+  --text-h:    #9E9E9E;
+  --r-sm:      6px;
+  --r-md:      10px;
+  --r-lg:      14px;
+  --sh:        0 2px 12px rgba(0,0,0,0.07);
+  --sh-md:     0 4px 20px rgba(0,0,0,0.11);
+}
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body { font-family: 'DM Sans', sans-serif; background: #EFEFEF; color: var(--text); min-height: 100vh; }
+
+/* Header */
+.header { background: var(--red); color: white; padding: 0 1.25rem; height: 58px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.22); }
+.header-brand { display: flex; align-items: center; gap: 10px; }
+.header-logo { width: 34px; height: 34px; background: white; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+.header-logo span { font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 700; color: var(--red); letter-spacing: -0.5px; }
+.header-title { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; }
+.header-sub { font-size: 11px; opacity: 0.8; }
+.header-badge { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 500; }
+
+/* Container */
+.container { max-width: 840px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+
+/* Steps */
+.steps-nav { display: flex; gap: 3px; background: white; border-radius: var(--r-lg); padding: 4px; margin-bottom: 1.25rem; box-shadow: var(--sh); overflow-x: auto; }
+.step-btn { flex: 1; min-width: 54px; padding: 7px 4px; border: none; background: transparent; border-radius: var(--r-md); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; color: var(--text-m); display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.15s; white-space: nowrap; }
+.step-btn.active { background: var(--red); color: white; }
+.step-btn.done { color: var(--green); }
+.step-num { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+.step-btn.active .step-num { background: white; color: var(--red); border-color: white; }
+.step-btn.done .step-num { background: var(--green); border-color: var(--green); color: white; }
+
+/* Section */
+.section { display: none; }
+.section.active { display: block; }
+.sec-title { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 8px; }
+.sec-title::before { content: ''; width: 4px; height: 20px; background: var(--red); border-radius: 2px; flex-shrink: 0; }
+
+/* Card */
+.card { background: white; border-radius: var(--r-lg); padding: 1.1rem 1.25rem; margin-bottom: .9rem; box-shadow: var(--sh); }
+.card-hd { font-size: 11px; font-weight: 600; color: var(--text-m); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .9rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gray-b); }
+
+/* Grids */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 11px; }
+
+/* Fields */
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 12px; font-weight: 500; color: var(--text-m); }
+.req { color: var(--red); font-style: normal; margin-left: 1px; }
+.hint { font-size: 11px; color: var(--text-h); line-height: 1.4; }
+.link-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: var(--green-d); background: var(--green-l); border-radius: 4px; padding: 2px 7px; margin-top: 3px; font-weight: 500; }
+
+.field input, .field select {
+  height: 38px; padding: 0 11px;
+  border: 1.5px solid var(--gray-b);
+  border-radius: var(--r-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: var(--text);
+  background: white;
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(204,0,0,0.08); }
+.field input.readonly { background: var(--gray-l); color: var(--text-m); cursor: default; border-color: var(--gray-b); }
+.field input.linked { background: var(--green-l); color: var(--green-d); cursor: default; border-color: rgba(29,158,117,0.3); font-weight: 500; }
+
+/* Total box */
+.total-box { background: white; border: 2px solid var(--green); border-radius: var(--r-md); padding: 11px 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; box-shadow: var(--sh); }
+.tb-lbl { font-size: 12px; color: var(--text-m); font-weight: 500; }
+.tb-sub { font-size: 10px; color: var(--text-h); margin-top: 2px; }
+.tb-val { font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; color: var(--green); }
+
+/* Info/warn */
+.info-box { background: var(--green-l); border-left: 3px solid var(--green); border-radius: var(--r-sm); padding: 9px 13px; margin-bottom: .9rem; }
+.info-box p { font-size: 12px; color: #085041; line-height: 1.5; }
+.warn-box { background: #FAEEDA; border-left: 3px solid #BA7517; border-radius: var(--r-sm); padding: 9px 13px; margin-bottom: .9rem; }
+.warn-box p { font-size: 12px; color: #854F0B; line-height: 1.5; }
+
+/* Classe badge */
+.classe-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--green-l); color: var(--green-d); }
+
+/* ANP table */
+.anp-tbl { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; border-radius: var(--r-sm); overflow: hidden; }
+.anp-tbl th { background: var(--red-d); color: white; padding: 6px 10px; text-align: left; font-weight: 600; }
+.anp-tbl td { padding: 5px 10px; border-bottom: 1px solid var(--gray-l); color: var(--text-m); }
+.anp-tbl tr:nth-child(even) td { background: #FAFAFA; }
+.anp-tbl tr.selected td { background: var(--green-l); color: #085041; font-weight: 600; }
+
+/* Imposto info */
+.imp-info { font-size: 11px; color: #185FA5; background: #E6F1FB; border-radius: var(--r-sm); padding: 6px 10px; margin-top: 8px; }
+
+/* Nav buttons */
+.nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 1.4rem; gap: 12px; }
+.btn-sec { padding: 9px 20px; border-radius: var(--r-md); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--gray-b); background: white; color: var(--text); transition: all .15s; }
+.btn-sec:hover { background: var(--gray-l); }
+.btn-primary { padding: 9px 20px; border-radius: var(--r-md); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: var(--red); color: white; transition: background .15s; }
+.btn-primary:hover { background: var(--red-d); }
+.btn-calcular { flex: 1; padding: 12px; background: var(--red); color: white; border: none; border-radius: var(--r-md); font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(204,0,0,0.28); transition: background .15s; }
+.btn-calcular:hover { background: var(--red-d); }
+
+/* Status badge */
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 1.25rem; }
+.status-badge.muito-atrativa { background: var(--green-l); color: var(--green-d); }
+.status-badge.atrativa { background: #EAF3DE; color: #3B6D11; }
+.status-badge.moderada { background: #FAEEDA; color: #854F0B; }
+.status-badge.baixa { background: var(--red-l); color: #A32D2D; }
+
+/* Result grids */
+.res-grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 9px; margin-bottom: .9rem; }
+.res-grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin-bottom: 1.4rem; }
+.metric { background: white; border-radius: var(--r-md); padding: .9rem; box-shadow: var(--sh); }
+.m-lbl { font-size: 11px; color: var(--text-m); margin-bottom: 5px; font-weight: 500; }
+.m-val { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; line-height: 1.1; }
+.m-val.green { color: var(--green); }
+.m-sub { font-size: 10px; color: var(--text-h); margin-top: 4px; }
+
+/* Cenários */
+.cen-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin-bottom: 1.25rem; }
+.cen-card { border: 1.5px solid var(--gray-b); border-radius: var(--r-lg); background: white; padding: .9rem; box-shadow: var(--sh); }
+.cen-card.base { border-color: var(--green); border-width: 2px; }
+.cen-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; color: var(--text-m); }
+.cen-card.base .cen-tag { color: var(--green); }
+.cen-num { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.cen-st { font-size: 11px; margin-top: 8px; color: var(--text-m); }
+
+/* Charts */
+.chart-card { background: white; border-radius: var(--r-lg); padding: .9rem 1.1rem; margin-bottom: 1.1rem; box-shadow: var(--sh); }
+.ch-lbl { font-size: 11px; font-weight: 500; color: var(--text-m); margin-bottom: 10px; }
+
+/* Divider */
+.divider { height: 1px; background: var(--gray-b); margin: 1.4rem 0; }
+
+/* Recomendação */
+.rec-box { background: var(--green-l); border-radius: var(--r-lg); padding: .9rem 1.1rem; margin-bottom: 1.4rem; border-left: 4px solid var(--green); }
+.rec-title { font-size: 10px; font-weight: 600; color: #085041; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.rec-box p { font-size: 13px; color: #085041; line-height: 1.6; }
+
+/* Print */
+@media print {
+  .header, .steps-nav, .nav-btns, .btn-apresentacao, .pres-ft { display: none !important; }
+  body { background: white; }
+}
+
+/* Responsive */
+@media (max-width: 620px) {
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .res-grid4 { grid-template-columns: 1fr 1fr; }
+  .res-grid3 { grid-template-columns: 1fr 1fr; }
+  .cen-grid { grid-template-columns: 1fr; }
+  .step-lbl { display: none; }
+  .header-badge { display: none; }
+  .container { padding: 1rem .75rem 4rem; }
+}
+@media (max-width: 400px) {
+  .res-grid4 { grid-template-columns: 1fr; }
+  .res-grid3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo"><span>COPA</span></div>
+    <div>
+      <div class="header-title">Calculadora de Payback</div>
+      <div class="header-sub">Copa Energia</div>
+    </div>
+  </div>
+  <div class="header-badge">Estudo de Viabilidade</div>
+</header>
+
+<main class="container">
+
+  <nav class="steps-nav">
+    <button class="step-btn active" onclick="goTo(0)"><div class="step-num">1</div><span class="step-lbl">Identificação</span></button>
+    <button class="step-btn" onclick="goTo(1)"><div class="step-num">2</div><span class="step-lbl">Investimento</span></button>
+    <button class="step-btn" onclick="goTo(2)"><div class="step-num">3</div><span class="step-lbl">Receita</span></button>
+    <button class="step-btn" onclick="goTo(3)"><div class="step-num">4</div><span class="step-lbl">Custos Fixos</span></button>
+    <button class="step-btn" onclick="goTo(4)"><div class="step-num">5</div><span class="step-lbl">Resultado</span></button>
+  </nav>
+
+  <!-- ETAPA 1 -->
+  <div class="section active" id="sec0">
+    <div class="sec-title">Dados do prospect</div>
+    <div class="card">
+      <div class="card-hd">Informações gerais</div>
+      <div class="grid2">
+        <div class="field"><label>Nome do prospect <b class="req">*</b></label><input type="text" id="nome" placeholder="Ex: Revenda Centro Sul" autocomplete="off" /></div>
+        <div class="field"><label>Consultor responsável</label><input type="text" id="consultor" placeholder="Nome do consultor" /></div>
+        <div class="field"><label>Cidade <b class="req">*</b></label><input type="text" id="cidade" placeholder="Ex: Campinas" /></div>
+        <div class="field"><label>Estado (UF)</label>
+          <select id="uf">
+            <option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option>
+            <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+            <option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option>
+            <option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
+            <option>RO</option><option>RR</option><option>RS</option><option>SC</option><option selected>SP</option>
+            <option>SE</option><option>TO</option>
+          </select>
+        </div>
+        <div class="field"><label>Status do estudo</label>
+          <select id="status_estudo">
+            <option>Em análise</option><option>Em prospecção</option>
+            <option>Proposta enviada</option><option>Negociação</option><option>Fechado</option>
+          </select>
+        </div>
+        <div class="field"><label>Data do estudo</label><input type="date" id="data_estudo" /></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd">Classe do revendedor — ANP</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Selecione a classe <b class="req">*</b></label>
+          <select id="classe" onchange="atualizarClasse()">
+            <option value="">Selecione...</option>
+            <option value="I">Classe I</option><option value="II">Classe II</option>
+            <option value="III">Classe III</option><option value="IV">Classe IV</option>
+            <option value="V">Classe V</option><option value="VI">Classe VI</option>
+            <option value="VII">Classe VII</option><option value="Especial">Classe Especial</option>
+          </select>
+          <div id="classe_badge_wrap" style="margin-top:6px"></div>
+        </div>
+        <div class="field">
+          <label>Estoque máximo permitido (P-13)</label>
+          <input type="text" id="estoque_max_display" class="readonly" readonly placeholder="Selecione a classe" />
+          <span class="hint">Limite ANP conforme a classe</span>
+        </div>
+      </div>
+      <div class="info-box" id="classe_info" style="display:none"><p id="classe_info_txt"></p></div>
+      <table class="anp-tbl" id="anp_table">
+        <tr><th>Classe</th><th>Capacidade (kg GLP)</th><th>Máx. P-13</th></tr>
+        <tr data-c="I"><td>Classe I</td><td>até 520 kg</td><td>40 botijões</td></tr>
+        <tr data-c="II"><td>Classe II</td><td>até 1.560 kg</td><td>120 botijões</td></tr>
+        <tr data-c="III"><td>Classe III</td><td>até 6.240 kg</td><td>480 botijões</td></tr>
+        <tr data-c="IV"><td>Classe IV</td><td>até 12.480 kg</td><td>960 botijões</td></tr>
+        <tr data-c="V"><td>Classe V</td><td>até 24.960 kg</td><td>1.920 botijões</td></tr>
+        <tr data-c="VI"><td>Classe VI</td><td>até 49.920 kg</td><td>3.840 botijões</td></tr>
+        <tr data-c="VII"><td>Classe VII</td><td>até 99.840 kg</td><td>7.680 botijões</td></tr>
+        <tr data-c="Especial"><td>Classe Especial</td><td>acima de 99.840 kg</td><td>&gt; 7.680</td></tr>
+      </table>
+    </div>
+    <div class="nav-btns"><div></div><button class="btn-primary" onclick="goTo(1)">Próximo →</button></div>
+  </div>
+
+  <!-- ETAPA 2 -->
+  <div class="section" id="sec1">
+    <div class="sec-title">Investimento inicial</div>
+    <div class="card">
+      <div class="card-hd">Estrutura e licenças</div>
+      <div class="grid2">
+        <div class="field"><label>Reforma e adequação do ponto</label><input type="text" id="inv_reforma" value="20.000,00" oninput="moeda(this); atualizarInv()" onblur="moedaBlur(this); atualizarInv()" /><span class="hint">Obras, pintura, adequações físicas</span></div>
+        <div class="field"><label>Taxas, licenças e regularização</label><input type="text" id="inv_taxas" value="8.000,00" oninput="moeda(this); atualizarInv()" onblur="moedaBlur(this); atualizarInv()" /><span class="hint">Alvará, ANP, CNPJ, licenças</span></div>
+        <div class="field"><label>Equipamentos operacionais</label><input type="text" id="inv_equip" value="18.000,00" oninput="moeda(this); atualizarInv()" onblur="moedaBlur(this); atualizarInv()" /><span class="hint">Balanças, EPIs, utensílios</span></div>
+        <div class="field"><label>Veículo / adaptação logística</label><input type="text" id="inv_veiculo" value="45.000,00" oninput="moeda(this); atualizarInv()" onblur="moedaBlur(this); atualizarInv()" /></div>
+        <div class="field"><label>Escritório</label><input type="text" id="inv_escritorio" value="10.000,00" oninput="moeda(this); atualizarInv()" onblur="moedaBlur(this); atualizarInv()" /><span class="hint">Computador, móveis, sistema</span></div>
+        <div class="field"><label>Marketing de lançamento</label><input type="text" id="inv_mkt" value="6.000,00" oninput="moeda(this); atualizarInv()" onblur="moedaBlur(this); atualizarInv()" /></div>
+        <div class="field"><label>Capital de giro inicial</label><input type="text" id="inv_giro" value="35.000,00" oninput="moeda(this); atualizarInv()" onblur="moedaBlur(this); atualizarInv()" /><span class="hint">Reserva para os primeiros meses</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd">Estoque inicial</div>
+      <div id="aviso_classe" class="warn-box"><p>Selecione a classe do revendedor na Etapa 1 para calcular o estoque.</p></div>
+      <div class="grid3">
+        <div class="field"><label>Estoque máximo (P-13)</label><input type="text" id="est_max_qtd" class="readonly" readonly placeholder="— botijões" /></div>
+        <div class="field"><label>Quantidade inicial desejada</label><input type="number" id="est_qtd" placeholder="Ex: 30" min="0" oninput="calcEstoque()" /><span class="hint" id="est_hint">Não pode superar o máximo da classe</span></div>
+        <div class="field"><label>Custo de compra por P-13</label><input type="text" id="est_custo" value="43,00" oninput="moeda(this); sincCusto()" onblur="moedaBlur(this); sincCusto()" /><span class="hint">Vira custo variável na Etapa 3</span></div>
+      </div>
+      <div class="total-box" id="est_total" style="display:none">
+        <div><div class="tb-lbl">Valor do estoque inicial</div><div class="tb-sub">Quantidade × custo unitário</div></div>
+        <div class="tb-val" id="est_valor">R$ 0,00</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd">Contingência (automático)</div>
+      <div style="max-width:340px">
+        <div class="field"><label>Outros / contingência (3% do subtotal)</label><input type="text" id="inv_outros" class="readonly" readonly /><span class="hint">Calculado automaticamente</span></div>
+      </div>
+    </div>
+    <div class="total-box">
+      <div><div class="tb-lbl">Total do investimento inicial</div><div class="tb-sub">Soma automática</div></div>
+      <div class="tb-val" id="total_inv">R$ 0,00</div>
+    </div>
+    <div class="nav-btns"><button class="btn-sec" onclick="goTo(0)">← Voltar</button><button class="btn-primary" onclick="goTo(2)">Próximo →</button></div>
+  </div>
+
+  <!-- ETAPA 3 -->
+  <div class="section" id="sec2">
+    <div class="sec-title">Receita e custos variáveis</div>
+    <div class="card">
+      <div class="card-hd">Volume e preço</div>
+      <div class="grid2">
+        <div class="field"><label>Volume mensal estimado (botijões) <b class="req">*</b></label><input type="number" id="volume" value="3000" min="0" oninput="atualizarReceita()" /><span class="hint">Quantidade/mês após estabilização</span></div>
+        <div class="field"><label>Preço médio de venda por botijão <b class="req">*</b></label><input type="text" id="preco" value="72,00" oninput="moeda(this); atualizarReceita()" onblur="moedaBlur(this); atualizarReceita()" /></div>
+      </div>
+      <div class="total-box">
+        <div><div class="tb-lbl">Receita bruta mensal estimada</div><div class="tb-sub">Volume × preço médio</div></div>
+        <div class="tb-val" id="rec_bruta">R$ 0,00</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd">Custos variáveis por botijão</div>
+      <div class="grid2">
+        <div class="field"><label>Custo do produto por unidade</label><input type="text" id="cv_produto" class="linked" readonly /><span class="link-tag">↑ Vinculado ao custo de compra (Etapa 2)</span></div>
+        <div class="field"><label>Frete / abastecimento por unidade</label><input type="text" id="cv_frete" value="4,50" oninput="moeda(this); atualizarReceita()" onblur="moedaBlur(this); atualizarReceita()" /><span class="hint">Custo logístico por botijão</span></div>
+      </div>
+    </div>
+    <div class="card" style="border:1.5px solid #dbeafe">
+      <div class="card-hd">Impostos — Simples Nacional (automático)</div>
+      <div class="grid3">
+        <div class="field"><label>Receita bruta mensal</label><input type="text" id="imp_receita" class="readonly" readonly /></div>
+        <div class="field"><label>Alíquota aplicada</label><input type="text" id="imp_aliquota" class="readonly" readonly /></div>
+        <div class="field"><label>Imposto mensal estimado</label><input type="text" id="imp_valor" class="readonly" readonly /></div>
+      </div>
+      <div class="imp-info" id="imp_info">Informe o volume e o preço para calcular.</div>
+    </div>
+    <div class="nav-btns"><button class="btn-sec" onclick="goTo(1)">← Voltar</button><button class="btn-primary" onclick="goTo(3)">Próximo →</button></div>
+  </div>
+
+  <!-- ETAPA 4 -->
+  <div class="section" id="sec3">
+    <div class="sec-title">Custos fixos mensais</div>
+    <div class="card">
+      <div class="grid2">
+        <div class="field"><label>Aluguel / condomínio</label><input type="text" id="cf_aluguel" value="4.500,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /></div>
+        <div class="field"><label>Salários</label><input type="text" id="cf_salarios" value="9.000,00" oninput="moeda(this); atualizarEncargos()" onblur="moedaBlur(this); atualizarEncargos()" /><span class="hint">Folha bruta da equipe</span></div>
+        <div class="field"><label>Encargos trabalhistas (35% — automático)</label><input type="text" id="cf_encargos" class="readonly" readonly /><span class="hint">Calculado sobre os salários</span></div>
+        <div class="field"><label>Utilidades e telecom</label><input type="text" id="cf_util" value="900,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /><span class="hint">Energia, água, internet, telefone</span></div>
+        <div class="field"><label>Combustível</label><input type="text" id="cf_comb" value="2.500,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /></div>
+        <div class="field"><label>Sistema / contabilidade</label><input type="text" id="cf_sistema" value="850,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /><span class="hint">ERP, software, honorários contábeis</span></div>
+        <div class="field"><label>Outros custos fixos</label><input type="text" id="cf_outros" value="800,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /></div>
+      </div>
+    </div>
+    <div class="total-box">
+      <div><div class="tb-lbl">Total de custos fixos mensais</div><div class="tb-sub">Soma automática</div></div>
+      <div class="tb-val" id="total_cf">R$ 0,00</div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-sec" onclick="goTo(2)">← Voltar</button>
+      <button class="btn-calcular" onclick="calcular()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Calcular Payback
+      </button>
+    </div>
+  </div>
+
+  <!-- ETAPA 5 -->
+  <div class="section" id="sec4">
+    <div class="sec-title">Resultados do estudo</div>
+    <div id="status_badge" class="status-badge"><span>●</span><span id="status_txt">—</span></div>
+    <div class="res-grid4">
+      <div class="metric"><div class="m-lbl">Investimento total</div><div class="m-val" id="r_inv">—</div><div class="m-sub">CAPEX + capital de giro</div></div>
+      <div class="metric"><div class="m-lbl">Lucro líquido mensal</div><div class="m-val green" id="r_lucro">—</div><div class="m-sub">Resultado operacional</div></div>
+      <div class="metric"><div class="m-lbl">Payback simples</div><div class="m-val green" id="r_payback">—</div><div class="m-sub">Meses para retorno</div></div>
+      <div class="metric"><div class="m-lbl">Break-even (volume)</div><div class="m-val" id="r_be">—</div><div class="m-sub">Mínimo viável/mês</div></div>
+    </div>
+    <div class="res-grid3">
+      <div class="metric"><div class="m-lbl">Receita bruta mensal</div><div class="m-val" id="r_receita">—</div></div>
+      <div class="metric"><div class="m-lbl">Margem de contribuição</div><div class="m-val" id="r_mc">—</div><div class="m-sub" id="r_mc_pct">—</div></div>
+      <div class="metric"><div class="m-lbl">ROI anual</div><div class="m-val green" id="r_roi">—</div><div class="m-sub">Retorno anual estimado</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="sec-title" style="font-size:16px;margin-bottom:1rem">Cenários de viabilidade</div>
+    <div class="cen-grid">
+      <div class="cen-card"><div class="cen-tag">Conservador (−20%)</div><div class="m-lbl">Lucro líquido</div><div class="cen-num" id="c_con_l">—</div><div class="m-lbl" style="margin-top:8px">Payback</div><div class="cen-num" id="c_con_p">—</div><div class="cen-st" id="c_con_s">—</div></div>
+      <div class="cen-card base"><div class="cen-tag">Base (estimado)</div><div class="m-lbl">Lucro líquido</div><div class="cen-num" id="c_base_l">—</div><div class="m-lbl" style="margin-top:8px">Payback</div><div class="cen-num" id="c_base_p">—</div><div class="cen-st" style="color:var(--green);font-weight:600">Referência</div></div>
+      <div class="cen-card"><div class="cen-tag">Otimista (+15%)</div><div class="m-lbl">Lucro líquido</div><div class="cen-num" id="c_oti_l">—</div><div class="m-lbl" style="margin-top:8px">Payback</div><div class="cen-num" id="c_oti_p">—</div><div class="cen-st" id="c_oti_s">—</div></div>
+    </div>
+    <div class="chart-card"><div class="ch-lbl">Lucro líquido por cenário (R$)</div><div style="position:relative;height:150px"><canvas id="chartCenarios"></canvas></div></div>
+    <div class="divider"></div>
+    <div class="sec-title" style="font-size:16px;margin-bottom:1rem">Fluxo de caixa — 12 meses</div>
+    <div class="chart-card"><div class="ch-lbl">Caixa acumulado — negativo em vermelho, positivo em verde</div><div style="position:relative;height:200px"><canvas id="chartFluxo"></canvas></div></div>
+    <div class="rec-box"><div class="rec-title">Recomendação comercial</div><p id="rec_txt">—</p></div>
+    <div class="nav-btns">
+      <button class="btn-sec" onclick="goTo(3)">← Voltar</button>
+      <button class="btn-primary" onclick="novoEstudo()">+ Novo estudo</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const CLASSES = {
+  'I':        { max:40,    info:'Capacidade de até 520 kg de GLP. Estoque máximo de 40 botijões P-13.' },
+  'II':       { max:120,   info:'Capacidade de até 1.560 kg de GLP. Estoque máximo de 120 botijões P-13.' },
+  'III':      { max:480,   info:'Capacidade de até 6.240 kg de GLP. Estoque máximo de 480 botijões P-13.' },
+  'IV':       { max:960,   info:'Capacidade de até 12.480 kg de GLP. Estoque máximo de 960 botijões P-13.' },
+  'V':        { max:1920,  info:'Capacidade de até 24.960 kg de GLP. Estoque máximo de 1.920 botijões P-13.' },
+  'VI':       { max:3840,  info:'Capacidade de até 49.920 kg de GLP. Estoque máximo de 3.840 botijões P-13.' },
+  'VII':      { max:7680,  info:'Capacidade de até 99.840 kg de GLP. Estoque máximo de 7.680 botijões P-13.' },
+  'Especial': { max:99999, info:'Capacidade acima de 99.840 kg de GLP. Mais de 7.680 botijões P-13.' },
+};
+
+function moeda(el) {
+  let v = el.value.replace(/\D/g,'');
+  if (!v) { el.value=''; return; }
+  el.value = (parseInt(v)/100).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+function moedaBlur(el) {
+  let v = el.value.replace(/\D/g,'');
+  if (!v) { el.value='0,00'; return; }
+  el.value = (parseInt(v)/100).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+function parseV(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  return parseFloat((el.value||'0').replace(/\./g,'').replace(',','.')) || 0;
+}
+function fmtR(n) { return 'R$ '+Math.abs(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtN(n,d) { return n.toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+
+function goTo(n) {
+  document.querySelectorAll('.section').forEach((s,i)=>s.classList.toggle('active',i===n));
+  document.querySelectorAll('.step-btn').forEach((b,i)=>{
+    b.classList.toggle('active',i===n);
+    i<n ? b.classList.add('done') : b.classList.remove('done');
+  });
+  if (n===1) {
+    const sel = document.getElementById('classe').value;
+    const aviso = document.getElementById('aviso_classe');
+    if (aviso) aviso.style.display = sel?'none':'block';
+    if (sel) {
+      const max = CLASSES[sel].max;
+      const el = document.getElementById('est_max_qtd');
+      if (el) el.value = (sel==='Especial'?'Mais de 7.680':fmtN(max))+' botijões';
+    }
+  }
+  atualizarInv();
+  atualizarEncargos();
+  atualizarReceita();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function atualizarClasse() {
+  const sel = document.getElementById('classe').value;
+  document.querySelectorAll('#anp_table tr[data-c]').forEach(r=>r.classList.toggle('selected',r.dataset.c===sel));
+  const wrap = document.getElementById('classe_badge_wrap');
+  const info = document.getElementById('classe_info');
+  const display = document.getElementById('estoque_max_display');
+  if (!sel) { wrap.innerHTML=''; info.style.display='none'; display.value=''; return; }
+  const c = CLASSES[sel];
+  const maxTxt = sel==='Especial' ? 'Mais de 7.680' : fmtN(c.max);
+  display.value = maxTxt+' botijões';
+  wrap.innerHTML = `<span class="classe-badge">${sel==='Especial'?'Classe Especial':'Classe '+sel} — máx. ${maxTxt} P-13</span>`;
+  info.style.display = 'block';
+  document.getElementById('classe_info_txt').textContent = c.info;
+  const maxEl = document.getElementById('est_max_qtd');
+  if (maxEl) maxEl.value = maxTxt+' botijões';
+  const hintEl = document.getElementById('est_hint');
+  if (hintEl) hintEl.textContent = 'Máximo permitido: '+maxTxt+' botijões';
+  calcEstoque();
+}
+
+function calcEstoque() {
+  const sel = document.getElementById('classe').value;
+  const qtdEl = document.getElementById('est_qtd');
+  const qtd = parseInt(qtdEl.value)||0;
+  const custo = parseV('est_custo');
+  const wrap = document.getElementById('est_total');
+  if (!sel||!qtd||!custo) { if(wrap) wrap.style.display='none'; atualizarInv(); return; }
+  const max = CLASSES[sel].max;
+  if (sel!=='Especial'&&qtd>max) qtdEl.value=max;
+  const qtdFinal = sel!=='Especial' ? Math.min(qtd,max) : qtd;
+  document.getElementById('est_valor').textContent = fmtR(qtdFinal*custo);
+  if(wrap) wrap.style.display='flex';
+  atualizarInv();
+}
+
+function sincCusto() {
+  const src = document.getElementById('est_custo');
+  const dst = document.getElementById('cv_produto');
+  if(src && dst) dst.value = src.value;
+  calcEstoque();
+  atualizarReceita();
+}
+
+function atualizarInv() {
+  const itens = parseV('inv_reforma')+parseV('inv_taxas')+parseV('inv_equip')+
+                parseV('inv_veiculo')+parseV('inv_escritorio')+parseV('inv_mkt')+parseV('inv_giro');
+  const sel = document.getElementById('classe').value;
+  const qtd = parseInt(document.getElementById('est_qtd').value)||0;
+  const custo = parseV('est_custo');
+  const max = sel ? CLASSES[sel].max : 0;
+  const qtdFinal = (sel&&sel!=='Especial') ? Math.min(qtd,max) : qtd;
+  const subtotal = itens+(qtdFinal*custo);
+  const outros = subtotal*0.03;
+  const total = subtotal+outros;
+  const outrosEl = document.getElementById('inv_outros');
+  if(outrosEl) outrosEl.value = outros.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const totalEl = document.getElementById('total_inv');
+  if(totalEl) totalEl.textContent = fmtR(total);
+  return total;
+}
+
+function atualizarEncargos() {
+  const enc = document.getElementById('cf_encargos');
+  if(enc) enc.value = (parseV('cf_salarios')*0.35).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  atualizarCF();
+}
+
+function atualizarCF() {
+  const enc = parseFloat((document.getElementById('cf_encargos').value||'0').replace(/\./g,'').replace(',','.'))||0;
+  const total = parseV('cf_aluguel')+parseV('cf_salarios')+enc+parseV('cf_util')+parseV('cf_comb')+parseV('cf_sistema')+parseV('cf_outros');
+  const el = document.getElementById('total_cf');
+  if(el) el.textContent = fmtR(total);
+  return total;
+}
+
+function getCF() {
+  const enc = parseFloat((document.getElementById('cf_encargos').value||'0').replace(/\./g,'').replace(',','.'))||0;
+  return parseV('cf_aluguel')+parseV('cf_salarios')+enc+parseV('cf_util')+parseV('cf_comb')+parseV('cf_sistema')+parseV('cf_outros');
+}
+
+function calcImposto(rec) {
+  const anual = rec*12;
+  let a = anual<=180000?0.040:anual<=360000?0.073:anual<=720000?0.095:anual<=1800000?0.107:0.143;
+  return { aliquota:a, valor:rec*a };
+}
+
+function atualizarReceita() {
+  const vol = parseInt(document.getElementById('volume').value)||0;
+  const preco = parseV('preco');
+  const recB = vol*preco;
+  const recBEl = document.getElementById('rec_bruta');
+  if(recBEl) recBEl.textContent = fmtR(recB);
+  const impRecEl = document.getElementById('imp_receita');
+  if(impRecEl) impRecEl.value = fmtR(recB);
+  const imp = calcImposto(recB);
+  const aliqEl = document.getElementById('imp_aliquota');
+  if(aliqEl) aliqEl.value = fmtN(imp.aliquota*100,1)+'%';
+  const valEl = document.getElementById('imp_valor');
+  if(valEl) valEl.value = fmtR(imp.valor);
+  const anual = recB*12;
+  const faixa = anual<=180000?'Faixa 1 — até R$ 180k/ano (4,0%)':anual<=360000?'Faixa 2 — até R$ 360k/ano (7,3%)':anual<=720000?'Faixa 3 — até R$ 720k/ano (9,5%)':anual<=1800000?'Faixa 4 — até R$ 1,8M/ano (10,7%)':'Faixa 5 — acima de R$ 1,8M/ano (14,3%)';
+  const infoEl = document.getElementById('imp_info');
+  if(infoEl) infoEl.textContent = 'Simples Nacional — '+faixa;
+  return recB;
+}
+
+function calcCenario(multVol) {
+  const vol = (parseInt(document.getElementById('volume').value)||0)*multVol;
+  const preco = parseV('preco');
+  const recB = vol*preco;
+  const cv = (parseV('cv_produto')+parseV('cv_frete'))*vol + calcImposto(recB).valor;
+  const cf = getCF();
+  const mc = recB-cv;
+  const lucro = mc-cf;
+  const inv = atualizarInv();
+  const payback = lucro>0?inv/lucro:9999;
+  const mcPct = recB>0?mc/recB:0;
+  const breakevenVol = mcPct>0&&preco>0?(cf/mcPct)/preco:0;
+  const roiAnual = inv>0?(lucro*12)/inv:0;
+  return {vol,recB,cv,cf,mc,mcPct,lucro,payback,breakevenVol,roiAnual,inv};
+}
+
+function calcFluxo() {
+  const inv = atualizarInv();
+  const rampas = [0.45,0.60,0.75];
+  let acc = -inv;
+  const meses=[], caixaAcc=[];
+  for (let i=1;i<=12;i++) {
+    const mult = i<=3?rampas[i-1]:rampas[2]*Math.pow(1.015,i-3);
+    const vol = (parseInt(document.getElementById('volume').value)||0)*mult;
+    const preco = parseV('preco');
+    const recB = vol*preco;
+    const cv = (parseV('cv_produto')+parseV('cv_frete'))*vol + calcImposto(recB).valor;
+    acc += recB-cv-getCF();
+    meses.push('M'+i);
+    caixaAcc.push(Math.round(acc));
+  }
+  return {meses,caixaAcc};
+}
+
+function getStatus(p) {
+  if (p<=6)  return {txt:'Muito atrativa',  cls:'muito-atrativa'};
+  if (p<=12) return {txt:'Atrativa',         cls:'atrativa'};
+  if (p<=18) return {txt:'Moderada',         cls:'moderada'};
+  return      {txt:'Baixa atratividade', cls:'baixa'};
+}
+
+let chartCen=null, chartFlx=null;
+
+function calcular() {
+  const base=calcCenario(1), con=calcCenario(0.8), oti=calcCenario(1.15);
+  const fluxo=calcFluxo(), status=getStatus(base.payback);
+
+  document.getElementById('r_inv').textContent     = fmtR(base.inv);
+  document.getElementById('r_lucro').textContent   = fmtR(base.lucro);
+  document.getElementById('r_payback').textContent = fmtN(base.payback,1)+' meses';
+  document.getElementById('r_be').textContent      = fmtN(base.breakevenVol,0)+' un/mês';
+  document.getElementById('r_receita').textContent = fmtR(base.recB);
+  document.getElementById('r_mc').textContent      = fmtR(base.mc);
+  document.getElementById('r_mc_pct').textContent  = fmtN(base.mcPct*100,1)+'%';
+  document.getElementById('r_roi').textContent     = fmtN(base.roiAnual*100,0)+'%';
+
+  const sb = document.getElementById('status_badge');
+  sb.className = 'status-badge '+status.cls;
+  document.getElementById('status_txt').textContent = status.txt;
+
+  [['con',con],['base',base],['oti',oti]].forEach(([k,d])=>{
+    document.getElementById(`c_${k}_l`).textContent = fmtR(d.lucro);
+    document.getElementById(`c_${k}_p`).textContent = fmtN(d.payback,1)+' meses';
+    if (k!=='base') {
+      const el = document.getElementById(`c_${k}_s`);
+      el.textContent = d.payback<=18?'✓ Dentro da meta':'✗ Acima da meta';
+      el.style.color = d.payback<=18?'var(--green-d)':'#A32D2D';
+    }
+  });
+
+  const recs = {
+    'muito-atrativa':'Avançar com prioridade alta: premissas sustentam retorno curto e excelente atratividade.',
+    'atrativa':'Avançar com a proposta: viabilidade confirmada, retorno dentro da meta comercial.',
+    'moderada':'Analisar com atenção: viabilidade moderada. Verificar volume estimado e principais custos.',
+    'baixa':'Revisar premissas antes de avançar: payback acima da meta. Avaliar redução de custos ou aumento de volume.',
+  };
+  document.getElementById('rec_txt').textContent = recs[status.cls];
+
+  if (chartCen) chartCen.destroy();
+  chartCen = new Chart(document.getElementById('chartCenarios'),{
+    type:'bar',
+    data:{labels:['Conservador','Base','Otimista'],datasets:[{data:[Math.round(con.lucro),Math.round(base.lucro),Math.round(oti.lucro)],backgroundColor:['#9FE1CB','#1D9E75','#5DCAA5'],borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+
+  if (chartFlx) chartFlx.destroy();
+  chartFlx = new Chart(document.getElementById('chartFluxo'),{
+    type:'bar',
+    data:{labels:fluxo.meses,datasets:[{data:fluxo.caixaAcc,backgroundColor:fluxo.caixaAcc.map(v=>v>=0?'rgba(29,158,117,0.2)':'rgba(204,0,0,0.15)'),borderColor:fluxo.caixaAcc.map(v=>v>=0?'#1D9E75':'#CC0000'),borderWidth:1.5,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10},autoSkip:false,maxRotation:0}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}}}}
+  });
+
+  goTo(4);
+}
+
+function novoEstudo() {
+  if (!confirm('Deseja iniciar um novo estudo? Os dados atuais serão perdidos.')) return;
+  location.reload();
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('data_estudo').value = new Date().toISOString().split('T')[0];
+  sincCusto();
+  atualizarInv();
+  atualizarEncargos();
+  atualizarReceita();
+});
+</script>
+</body>
+</html>
