@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#CC0000" />
+  <meta name="description" content="Calculadora de Payback — Copa Energia" />
+  <title>Calculadora de Payback | Copa Energia</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="install-banner" id="installBanner">
+  <span>📱 Adicione à tela inicial para usar como app</span>
+  <div style="display:flex;gap:6px">
+    <button onclick="installApp()">Instalar</button>
+    <button class="close-btn" onclick="document.getElementById('installBanner').classList.remove('show')">✕</button>
+  </div>
+</div>
+
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo"><span>COPA</span></div>
+    <div>
+      <div class="header-title">Calculadora de Payback</div>
+      <div class="header-sub">Copa Energia</div>
+    </div>
+  </div>
+  <div class="header-badge">Estudo de Viabilidade</div>
+</header>
+
+<main class="container">
+
+  <nav class="steps-nav">
+    <button class="step-btn active" id="btn0" onclick="goTo(0)"><div class="step-num">1</div><span class="step-lbl">Identificação</span></button>
+    <button class="step-btn" id="btn1" onclick="goTo(1)"><div class="step-num">2</div><span class="step-lbl">Investimento</span></button>
+    <button class="step-btn" id="btn2" onclick="goTo(2)"><div class="step-num">3</div><span class="step-lbl">Receita</span></button>
+    <button class="step-btn" id="btn3" onclick="goTo(3)"><div class="step-num">4</div><span class="step-lbl">Custos Fixos</span></button>
+    <button class="step-btn" id="btn4" onclick="goTo(4)"><div class="step-num">5</div><span class="step-lbl">Resultado</span></button>
+  </nav>
+
+  <!-- ETAPA 1 -->
+  <div class="section active" id="sec0">
+    <div class="sec-title">Dados do prospect</div>
+    <div class="card">
+      <div class="card-hd">Informações gerais</div>
+      <div class="grid2">
+        <div class="field"><label>Nome do prospect <b class="req">*</b></label><input type="text" id="nome" placeholder="Ex: Revenda Centro Sul" autocomplete="off" /></div>
+        <div class="field"><label>Consultor responsável</label><input type="text" id="consultor" placeholder="Nome do consultor" /></div>
+        <div class="field"><label>Cidade <b class="req">*</b></label><input type="text" id="cidade" placeholder="Ex: Campinas" /></div>
+        <div class="field"><label>Estado (UF)</label>
+          <select id="uf">
+            <option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option>
+            <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+            <option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option>
+            <option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
+            <option>RO</option><option>RR</option><option>RS</option><option>SC</option><option selected>SP</option>
+            <option>SE</option><option>TO</option>
+          </select>
+        </div>
+        <div class="field"><label>Status do estudo</label>
+          <select id="status_estudo">
+            <option>Em análise</option><option>Em prospecção</option>
+            <option>Proposta enviada</option><option>Negociação</option><option>Fechado</option>
+          </select>
+        </div>
+        <div class="field"><label>Data do estudo</label><input type="date" id="data_estudo" /></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Classe do revendedor — ANP</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Selecione a classe <b class="req">*</b></label>
+          <select id="classe" onchange="atualizarClasse()">
+            <option value="">Selecione...</option>
+            <option value="I">Classe I</option><option value="II">Classe II</option>
+            <option value="III">Classe III</option><option value="IV">Classe IV</option>
+            <option value="V">Classe V</option><option value="VI">Classe VI</option>
+            <option value="VII">Classe VII</option><option value="Especial">Classe Especial</option>
+          </select>
+          <div id="classe_badge_wrap" style="margin-top:6px"></div>
+        </div>
+        <div class="field">
+          <label>Estoque máximo permitido (P-13)</label>
+          <input type="text" id="estoque_max_display" class="readonly" readonly placeholder="Selecione a classe" />
+          <span class="hint">Limite ANP conforme a classe</span>
+        </div>
+      </div>
+      <div class="info-box" id="classe_info" style="display:none"><p id="classe_info_txt"></p></div>
+      <table class="anp-tbl" id="anp_table">
+        <tr><th>Classe</th><th>Capacidade (kg GLP)</th><th>Máx. P-13</th></tr>
+        <tr data-c="I"><td>Classe I</td><td>até 520 kg</td><td>40 botijões</td></tr>
+        <tr data-c="II"><td>Classe II</td><td>até 1.560 kg</td><td>120 botijões</td></tr>
+        <tr data-c="III"><td>Classe III</td><td>até 6.240 kg</td><td>480 botijões</td></tr>
+        <tr data-c="IV"><td>Classe IV</td><td>até 12.480 kg</td><td>960 botijões</td></tr>
+        <tr data-c="V"><td>Classe V</td><td>até 24.960 kg</td><td>1.920 botijões</td></tr>
+        <tr data-c="VI"><td>Classe VI</td><td>até 49.920 kg</td><td>3.840 botijões</td></tr>
+        <tr data-c="VII"><td>Classe VII</td><td>até 99.840 kg</td><td>7.680 botijões</td></tr>
+        <tr data-c="Especial"><td>Classe Especial</td><td>acima de 99.840 kg</td><td>&gt; 7.680</td></tr>
+      </table>
+    </div>
+    <div class="nav-btns"><div></div><button class="btn-primary" onclick="goTo(1)">Próximo →</button></div>
+  </div>
+
+  <!-- ETAPA 2 -->
+  <div class="section" id="sec1">
+    <div class="sec-title">Investimento inicial</div>
+    <div class="card">
+      <div class="card-hd">Estrutura e licenças</div>
+      <div class="grid2">
+        <div class="field"><label>Reforma e adequação do ponto</label><input type="text" id="inv_reforma" value="20.000,00" oninput="moeda(this)" onblur="moedaBlur(this)" /><span class="hint">Obras, pintura, adequações físicas</span></div>
+        <div class="field"><label>Taxas, licenças e regularização</label><input type="text" id="inv_taxas" value="8.000,00" oninput="moeda(this)" onblur="moedaBlur(this)" /><span class="hint">Alvará, ANP, CNPJ, licenças</span></div>
+        <div class="field"><label>Equipamentos operacionais</label><input type="text" id="inv_equip" value="18.000,00" oninput="moeda(this)" onblur="moedaBlur(this)" /><span class="hint">Balanças, EPIs, utensílios</span></div>
+        <div class="field"><label>Veículo / adaptação logística</label><input type="text" id="inv_veiculo" value="45.000,00" oninput="moeda(this)" onblur="moedaBlur(this)" /></div>
+        <div class="field"><label>Escritório</label><input type="text" id="inv_escritorio" value="10.000,00" oninput="moeda(this)" onblur="moedaBlur(this)" /><span class="hint">Computador, móveis, sistema</span></div>
+        <div class="field"><label>Marketing de lançamento</label><input type="text" id="inv_mkt" value="6.000,00" oninput="moeda(this)" onblur="moedaBlur(this)" /></div>
+        <div class="field"><label>Capital de giro inicial</label><input type="text" id="inv_giro" value="35.000,00" oninput="moeda(this)" onblur="moedaBlur(this)" /><span class="hint">Reserva para os primeiros meses</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Estoque inicial</div>
+      <div id="aviso_classe" class="warn-box" style="display:none"><p>Selecione a classe do revendedor na Etapa 1 para calcular o estoque.</p></div>
+      <div class="grid3">
+        <div class="field"><label>Estoque máximo (P-13)</label><input type="text" id="est_max_qtd" class="readonly" readonly placeholder="— botijões" /></div>
+        <div class="field"><label>Quantidade inicial desejada</label><input type="number" id="est_qtd" placeholder="Ex: 30" min="0" oninput="calcEstoque()" /><span class="hint" id="est_hint">Não pode superar o máximo da classe</span></div>
+        <div class="field"><label>Custo de compra por P-13</label><input type="text" id="est_custo" value="43,00" oninput="moeda(this); sincCusto()" onblur="moedaBlur(this); sincCusto()" /><span class="hint">Vira custo variável na Etapa 3</span></div>
+      </div>
+      <div class="total-box" id="est_total" style="display:none">
+        <div><div class="tb-lbl">Valor do estoque inicial</div><div class="tb-sub">Quantidade × custo unitário</div></div>
+        <div class="tb-val" id="est_valor">R$ 0,00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Contingência (automático)</div>
+      <div style="max-width:340px">
+        <div class="field"><label>Outros / contingência (3% do subtotal)</label><input type="text" id="inv_outros" class="readonly" readonly /><span class="hint">Calculado automaticamente</span></div>
+      </div>
+    </div>
+
+    <div class="total-box">
+      <div><div class="tb-lbl">Total do investimento inicial</div><div class="tb-sub">Soma automática</div></div>
+      <div class="tb-val" id="total_inv">R$ 0,00</div>
+    </div>
+    <div class="nav-btns"><button class="btn-sec" onclick="goTo(0)">← Voltar</button><button class="btn-primary" onclick="goTo(2)">Próximo →</button></div>
+  </div>
+
+  <!-- ETAPA 3 -->
+  <div class="section" id="sec2">
+    <div class="sec-title">Receita e custos variáveis</div>
+    <div class="card">
+      <div class="card-hd">Volume e preço</div>
+      <div class="grid2">
+        <div class="field"><label>Volume mensal estimado (botijões) <b class="req">*</b></label><input type="number" id="volume" value="3000" min="0" oninput="atualizarReceita()" /><span class="hint">Quantidade/mês após estabilização</span></div>
+        <div class="field"><label>Preço médio de venda por botijão <b class="req">*</b></label><input type="text" id="preco" value="72,00" oninput="moeda(this); atualizarReceita()" onblur="moedaBlur(this); atualizarReceita()" /></div>
+      </div>
+      <div class="total-box">
+        <div><div class="tb-lbl">Receita bruta mensal estimada</div><div class="tb-sub">Volume × preço médio</div></div>
+        <div class="tb-val" id="rec_bruta">R$ 0,00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Custos variáveis por botijão</div>
+      <div class="grid2">
+        <div class="field"><label>Custo do produto por unidade</label><input type="text" id="cv_produto" class="linked" readonly /><span class="link-tag">↑ Vinculado ao custo de compra (Etapa 2)</span></div>
+        <div class="field"><label>Frete / abastecimento por unidade</label><input type="text" id="cv_frete" value="4,50" oninput="moeda(this); atualizarReceita()" onblur="moedaBlur(this); atualizarReceita()" /><span class="hint">Custo logístico por botijão</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="border:1.5px solid #dbeafe">
+      <div class="card-hd">Impostos — Simples Nacional (automático)</div>
+      <div class="grid3">
+        <div class="field"><label>Receita bruta mensal</label><input type="text" id="imp_receita" class="readonly" readonly /></div>
+        <div class="field"><label>Alíquota aplicada</label><input type="text" id="imp_aliquota" class="readonly" readonly /></div>
+        <div class="field"><label>Imposto mensal estimado</label><input type="text" id="imp_valor" class="readonly" readonly /></div>
+      </div>
+      <div class="imp-info" id="imp_info">Informe o volume e o preço para calcular.</div>
+    </div>
+    <div class="nav-btns"><button class="btn-sec" onclick="goTo(1)">← Voltar</button><button class="btn-primary" onclick="goTo(3)">Próximo →</button></div>
+  </div>
+
+  <!-- ETAPA 4 -->
+  <div class="section" id="sec3">
+    <div class="sec-title">Custos fixos mensais</div>
+    <div class="card">
+      <div class="grid2">
+        <div class="field"><label>Aluguel / condomínio</label><input type="text" id="cf_aluguel" value="4.500,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /></div>
+        <div class="field"><label>Salários</label><input type="text" id="cf_salarios" value="9.000,00" oninput="moeda(this); atualizarEncargos()" onblur="moedaBlur(this); atualizarEncargos()" /><span class="hint">Folha bruta da equipe</span></div>
+        <div class="field"><label>Encargos trabalhistas (35% — automático)</label><input type="text" id="cf_encargos" class="readonly" readonly /><span class="hint">Calculado sobre os salários</span></div>
+        <div class="field"><label>Utilidades e telecom</label><input type="text" id="cf_util" value="900,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /><span class="hint">Energia, água, internet, telefone</span></div>
+        <div class="field"><label>Combustível</label><input type="text" id="cf_comb" value="2.500,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /></div>
+        <div class="field"><label>Sistema / contabilidade</label><input type="text" id="cf_sistema" value="850,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /><span class="hint">ERP, software, honorários contábeis</span></div>
+        <div class="field"><label>Outros custos fixos</label><input type="text" id="cf_outros" value="800,00" oninput="moeda(this); atualizarCF()" onblur="moedaBlur(this); atualizarCF()" /></div>
+      </div>
+    </div>
+    <div class="total-box">
+      <div><div class="tb-lbl">Total de custos fixos mensais</div><div class="tb-sub">Soma automática</div></div>
+      <div class="tb-val" id="total_cf">R$ 0,00</div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-sec" onclick="goTo(2)">← Voltar</button>
+      <button class="btn-calcular" onclick="calcular()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Calcular Payback
+      </button>
+    </div>
+  </div>
+
+  <!-- ETAPA 5 -->
+  <div class="section" id="sec4">
+    <div class="sec-title">Resultados do estudo</div>
+
+    <div id="status_badge" class="status-badge muito-atrativa"><span>●</span><span id="status_txt">—</span></div>
+
+    <div class="res-grid4">
+      <div class="metric"><div class="m-lbl">Investimento total</div><div class="m-val" id="r_inv">—</div><div class="m-sub">CAPEX + capital de giro</div></div>
+      <div class="metric"><div class="m-lbl">Lucro líquido mensal</div><div class="m-val green" id="r_lucro">—</div><div class="m-sub">Resultado operacional</div></div>
+      <div class="metric"><div class="m-lbl">Payback simples</div><div class="m-val green" id="r_payback">—</div><div class="m-sub">Meses para retorno</div></div>
+      <div class="metric"><div class="m-lbl">Break-even (volume)</div><div class="m-val" id="r_be">—</div><div class="m-sub">Mínimo viável/mês</div></div>
+    </div>
+    <div class="res-grid3">
+      <div class="metric"><div class="m-lbl">Receita bruta mensal</div><div class="m-val" id="r_receita">—</div></div>
+      <div class="metric"><div class="m-lbl">Margem de contribuição</div><div class="m-val" id="r_mc">—</div><div class="m-sub" id="r_mc_pct">—</div></div>
+      <div class="metric"><div class="m-lbl">ROI anual</div><div class="m-val green" id="r_roi">—</div><div class="m-sub">Retorno anual estimado</div></div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sec-title" style="font-size:16px;margin-bottom:1rem">Cenários de viabilidade</div>
+    <div class="cen-grid">
+      <div class="cen-card"><div class="cen-tag">Conservador (−20%)</div><div class="m-lbl">Lucro líquido</div><div class="cen-num" id="c_con_l">—</div><div class="m-lbl" style="margin-top:8px">Payback</div><div class="cen-num" id="c_con_p">—</div><div class="cen-st" id="c_con_s">—</div></div>
+      <div class="cen-card base"><div class="cen-tag">Base (estimado)</div><div class="m-lbl">Lucro líquido</div><div class="cen-num" id="c_base_l">—</div><div class="m-lbl" style="margin-top:8px">Payback</div><div class="cen-num" id="c_base_p">—</div><div class="cen-st" style="color:var(--green);font-weight:600">Referência</div></div>
+      <div class="cen-card"><div class="cen-tag">Otimista (+15%)</div><div class="m-lbl">Lucro líquido</div><div class="cen-num" id="c_oti_l">—</div><div class="m-lbl" style="margin-top:8px">Payback</div><div class="cen-num" id="c_oti_p">—</div><div class="cen-st" id="c_oti_s">—</div></div>
+    </div>
+
+    <div class="chart-card"><div class="ch-lbl">Lucro líquido por cenário (R$)</div><div style="position:relative;height:150px"><canvas id="chartCenarios"></canvas></div></div>
+
+    <div class="divider"></div>
+    <div class="sec-title" style="font-size:16px;margin-bottom:1rem">Fluxo de caixa — 12 meses</div>
+    <div class="chart-card"><div class="ch-lbl">Caixa acumulado — negativo em vermelho, positivo em verde</div><div style="position:relative;height:200px"><canvas id="chartFluxo"></canvas></div></div>
+
+    <div class="rec-box"><div class="rec-title">Recomendação comercial</div><p id="rec_txt">—</p></div>
+
+    <div class="nav-btns">
+      <button class="btn-sec" onclick="goTo(3)">← Voltar</button>
+      <button class="btn-primary" onclick="novoEstudo()">+ Novo estudo</button>
+    </div>
+
+    <button class="btn-apresentacao" id="btn_apres" onclick="gerarApresentacao()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Gerar apresentação para o cliente
+    </button>
+
+    <div class="pres-wrap" id="pres_preview" style="display:none">
+      <div class="pres-hd"><div class="pres-hd-title" id="pres_nome_title">Apresentação</div><div class="pres-hd-date" id="pres_data_title"></div></div>
+      <div class="pres-body" id="pres_body"></div>
+      <div class="pres-ft"><span style="font-size:12px;color:var(--text-m)">Consultor: <span id="pres_consultor_ft">—</span></span><button class="btn-primary" style="font-size:12px" onclick="window.print()">Imprimir / PDF</button></div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
